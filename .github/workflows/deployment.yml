@@ -1,0 +1,70 @@
+name: Deploy Fuelsgate Api Service
+
+on:
+  push:
+    branches:
+      - Main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20' 
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build application
+        run: yarn build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            dist
+            email-templates
+            package.json
+            yarn.lock
+            nest-cli.json
+
+      - name: Add Droplet to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DIGITALOCEAN_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to DigitalOcean Droplet
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DROPLET_HOST: ${{ secrets.DIGITALOCEAN_HOST }}
+          USERNAME: ${{ secrets.DROPLET_USERNAME }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Copy build files to the DigitalOcean Droplet
+          scp -i ~/.ssh/id_rsa -r dist email-templates package.json yarn.lock nest-cli.json $USERNAME@$DROPLET_HOST:/home/$USERNAME/app
+
+          # SSH into the Droplet and deploy the application
+          ssh -i ~/.ssh/id_rsa $USERNAME@$DROPLET_HOST << 'EOF'
+            cd ~/app/
+            # List files to ensure correct deployment
+            ls -al
+            
+            # Ensure the package.json exists
+            if [ -f package.json ]; then
+              yarn install --production
+              pm2 restart all || pm2 start dist/main.js --name "sali-api" -i max
+            else
+              echo "package.json not found. Deployment failed."
+              exit 1
+            fi
+          EOF
