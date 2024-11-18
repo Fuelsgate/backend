@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20' 
+          node-version: '20'
 
       - name: Install dependencies
         run: yarn install
@@ -46,6 +46,7 @@ jobs:
           DROPLET_HOST: ${{ secrets.DIGITALOCEAN_HOST }}
           USERNAME: ${{ secrets.DROPLET_USERNAME }}
         run: |
+          # Set up the SSH key
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
@@ -58,11 +59,21 @@ jobs:
             cd ~/app/
             # List files to ensure correct deployment
             ls -al
-            
+
             # Ensure the package.json exists
             if [ -f package.json ]; then
+              # Install production dependencies
               yarn install --production
-              pm2 restart all || pm2 start dist/main.js --name "sali-api" -i max
+
+              # Check if PM2 is installed, if not, install it
+              if ! command -v pm2 &> /dev/null
+              then
+                echo "PM2 could not be found, installing PM2..."
+                yarn global add pm2
+              fi
+
+              # Restart or start the application using PM2
+              pm2 restart all || pm2 start dist/main.js --name "fuelsgate-api" -i max
             else
               echo "package.json not found. Deployment failed."
               exit 1
