@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export type RoleType = 'buyer' | 'seller' | 'transporter';
+export type RoleType = 'buyer' | 'seller' | 'transporter' | 'admin';
 
 export class RoleDto extends Document {
   name: RoleType;
