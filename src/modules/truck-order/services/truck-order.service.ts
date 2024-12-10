@@ -9,6 +9,8 @@ import { OrderRepository } from "src/modules/order/repositories/order.repository
 import { SellerRepository } from "src/modules/seller/repositories/seller.repository";
 import { TruckOrderGateway } from "../gateway/truck-order.gateway";
 import { TransporterRepository } from "src/modules/transporter/repositories/transporter.repository";
+import { startOfDay } from "date-fns";
+import { endOfDay } from "date-fns";
 
 @Injectable()
 export class TruckOrderService {
@@ -22,6 +24,7 @@ export class TruckOrderService {
     @Inject(forwardRef(() => TruckOrderGateway))
     private readonly truckOrderGateway: TruckOrderGateway
   ) { }
+
   async getAllOrders(query: TruckOrderQueryDto) {
     const { page, limit, status, trackingId, buyerId, truckId, profileId, profileType, orderId } = query;
     let offset = 0;
@@ -32,6 +35,9 @@ export class TruckOrderService {
     if (profileId && !profileType) {
       throw new BadRequestException("Please provide a profile type")
     }
+
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
 
     let profile: any, buyer: any, order: any;
 
@@ -45,6 +51,9 @@ export class TruckOrderService {
     if (orderId && !order) throw new BadRequestException("order ID is invalid")
 
     const searchFilter: any = {
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
       $or: []
     };
 

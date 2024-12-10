@@ -13,6 +13,7 @@ import { TruckOrder } from 'src/modules/truck-order/entities/truck-order.entity'
 import { Transporter } from 'src/modules/transporter/entities/transporter.entity';
 import { Seller } from 'src/modules/seller/entities/seller.entity';
 
+
 const transporterTruckFilter = (transporterId: Types.ObjectId) => ({
   profileType: 'Transporter',
   profileId: transporterId,

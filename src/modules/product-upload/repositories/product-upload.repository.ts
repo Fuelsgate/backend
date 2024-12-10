@@ -45,8 +45,16 @@ export class ProductUploadRepository {
   }
 
   async getTotalPriceForSeller(sellerId: Types.ObjectId) {
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
     const result = await this.productUploadModel.aggregate([
-      { $match: { sellerId: sellerId } },
+      {
+        $match: {
+          sellerId: sellerId,
+          createdAt: { $gte: todayStart, $lte: todayEnd }
+        }
+      },
       { $group: { _id: null, totalPrice: { $sum: "$price" } } }
     ]);
 
@@ -54,8 +62,16 @@ export class ProductUploadRepository {
   }
 
   async getTotalVolumeForSeller(sellerId: Types.ObjectId) {
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
     const result = await this.productUploadModel.aggregate([
-      { $match: { sellerId: sellerId } },
+      {
+        $match: {
+          sellerId: sellerId,
+          createdAt: { $gte: todayStart, $lte: todayEnd }
+        }
+      },
       { $group: { _id: null, totalVolume: { $sum: "$volume" } } }
     ]);
 
@@ -69,7 +85,7 @@ export class ProductUploadRepository {
     const result = await this.productUploadModel.aggregate([
       {
         $match: {
-          timestamp: { $gte: todayStart, $lt: todayEnd }
+          createdAt: { $gte: todayStart, $lte: todayEnd }
         }
       },
       { $group: { _id: null, totalVolume: { $sum: "$volume" } } }
@@ -85,7 +101,7 @@ export class ProductUploadRepository {
     const result = await this.productUploadModel.aggregate([
       {
         $match: {
-          timestamp: { $gte: todayStart, $lte: todayEnd },
+          createdAt: { $gte: todayStart, $lte: todayEnd },
           sellerId: { $exists: true },
         },
       },

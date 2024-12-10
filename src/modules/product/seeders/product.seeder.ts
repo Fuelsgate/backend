@@ -12,7 +12,7 @@ export class ProductSeedService {
 
   private readonly PRODUCTS: ProductDto[] = [
     { name: 'AGO (Automotive Gas Oil)', value: 'ago', color: 'bg-blue-tone-350', status: 'active' },
-    { name: 'PMS (Premium Motor Spirits)', value: 'pms', color: 'bg-green-tone-700', status: 'active' },
+    { name: 'PMS (Premium Motor Spirits)', value: 'pms', color: 'bg-blue-300', status: 'active' },
     { name: 'LPG (Liquefied Petroleum Gas)', value: 'lpg', color: 'bg-red-tone-400', status: 'active' },
     { name: 'ATK (Aviation Turbine Kerosene)', value: 'atk', color: 'bg-yellow', status: 'active' },
     { name: 'CNG (Compressed Natural Gas)', value: 'cng', color: 'bg-dark-500', status: 'active' }

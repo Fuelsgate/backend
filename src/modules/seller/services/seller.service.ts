@@ -48,8 +48,8 @@ export class SellerService {
 
     const seller = await this.sellerRepository.findOneQuery({ userId: user.id })
 
-    const totalLitres = await this.productUploadRepository.getTotalPriceForSeller(seller?._id)
-    const totalWorth = await this.productUploadRepository.getTotalVolumeForSeller(seller?._id)
+    const totalWorth = await this.productUploadRepository.getTotalPriceForSeller(seller?._id)
+    const totalLitres = await this.productUploadRepository.getTotalVolumeForSeller(seller?._id)
 
     return {
       totalLitres,

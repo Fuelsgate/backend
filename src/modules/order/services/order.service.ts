@@ -7,6 +7,8 @@ import { IJwtPayload } from "src/shared/strategies/jwt.strategy";
 import { BuyerRepository } from "src/modules/buyer/repositories/buyer.repository";
 import { generateOrderId } from "src/utils/helpers";
 import { OrderGateway } from "../gateway/order.gateway";
+import { endOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 
 @Injectable()
 export class OrderService {
@@ -26,7 +28,13 @@ export class OrderService {
       offset = (page - 1) * limit;
     }
 
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
     const searchFilter: any = {
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
       $or: []
     };
 

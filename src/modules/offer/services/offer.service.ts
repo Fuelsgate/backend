@@ -5,6 +5,8 @@ import { UserRepository } from "src/modules/user/repositories/user.repository";
 import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ProductUploadRepository } from "src/modules/product-upload/repositories/product-upload.repository";
 import { MessageGateway } from "../gateway/message.gateway";
+import { startOfDay } from "date-fns";
+import { endOfDay } from "date-fns";
 
 @Injectable()
 export class OfferService {
@@ -39,9 +41,14 @@ export class OfferService {
     const { page = 1, limit = 10, search, status, profileId, productUploadId } = query;
     const offset = (page - 1) * limit;
 
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
     const searchFilter: any = {
       $or: [],
-      $and: [],
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
     };
 
     const user = await this.userRepository.findOne(profileId);
@@ -89,7 +96,6 @@ export class OfferService {
   }
 
   async updateOfferData(offerId: string, offerData: OfferDto) {
-    console.log('offerData', offerData)
     return await this.offerRepository.update(offerId, offerData);
   }
 
