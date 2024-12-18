@@ -21,6 +21,19 @@ export class OrderController {
     });
   }
 
+  @Get('get-orders-count')
+  async getOrdersCount(
+    @Query() query: OrderQueryDto,
+    @Response() res,
+  ): Promise<[]> {
+    const data = await this.orderService.getOrdersCount(query)
+    return res.status(200).json({
+      message: 'Orders count fetched successfully',
+      data,
+      statusCode: 200,
+    });
+  }
+
   @Get(':orderId')
   async getOne(
     @Param() param,

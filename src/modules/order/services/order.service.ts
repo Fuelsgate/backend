@@ -39,7 +39,7 @@ export class OrderService {
 
     let seller: any, buyer: any, productUpload: any;
 
-    if (buyerId) buyer = await this.buyerRepository.findOneQuery(buyerId)
+    if (buyerId) buyer = await this.buyerRepository.findOne(buyerId)
     if (sellerId) seller = await this.sellerRepository.findOne(sellerId)
     if (productUploadId) productUpload = await this.productUploadRepository.findOne(productUploadId)
 
@@ -66,6 +66,40 @@ export class OrderService {
     };
   }
 
+  async getOrdersCount(query: OrderQueryDto) {
+    const { status, trackingId, buyerId, sellerId, productUploadId } = query;
+
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
+    const searchFilter: any = {
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
+      $or: []
+    };
+
+    let seller: any, buyer: any, productUpload: any;
+
+    if (buyerId) buyer = await this.buyerRepository.findOne(buyerId)
+    if (sellerId) seller = await this.sellerRepository.findOne(sellerId)
+    if (productUploadId) productUpload = await this.productUploadRepository.findOne(productUploadId)
+
+    if (buyerId && !buyer) throw new BadRequestException("Buyer ID is invalid")
+    if (sellerId && !seller) throw new BadRequestException("Seller ID is invalid")
+    if (productUploadId && !productUpload) throw new BadRequestException("Product ID is invalid")
+
+    if (trackingId) searchFilter.$or.push({ trackingId: { $regex: trackingId, $options: 'i' } });
+    if (status) searchFilter.$or.push({ status: { $regex: status, $options: 'i' } });
+    if (buyerId) searchFilter.$or.push({ buyerId: buyer?._id });
+    if (sellerId) searchFilter.$or.push({ sellerId: seller?._id });
+    if (productUploadId) searchFilter.$or.push({ productUploadId: productUpload?._id });
+
+    if (!searchFilter.$or.length) delete searchFilter.$or;
+
+    return await this.orderRepository.getTotal(searchFilter)
+  }
+
   async getOneOrder(orderId: string) {
     const order = await this.orderRepository.findOne(orderId)
     if (!order) {
@@ -75,7 +109,6 @@ export class OrderService {
   }
 
   async updateStatusOrder(orderId: string, body: OrderDto) {
-    console.log('pizza', orderId, body)
     const _order = await this.orderRepository.findOne(orderId)
     if (body.status === 'completed') {
       const productUpload = await this.productUploadRepository.findOne(_order.productUploadId)

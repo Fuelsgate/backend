@@ -8,6 +8,19 @@ import { offerSchema, offerStatusSchema } from "../validations/offer.validation"
 export class OfferController {
   constructor(private readonly offerService: OfferService) { }
 
+  @Get('get-offers-count')
+  async getOffersCount(
+    @Query() query: OfferQueryDto,
+    @Response() res,
+  ): Promise<[]> {
+    const data = await this.offerService.getOffersCount(query)
+    return res.status(200).json({
+      message: 'Offers count fetched successfully',
+      data,
+      statusCode: 200,
+    });
+  }
+
   @Get()
   async getAll(
     @Query() query: OfferQueryDto,

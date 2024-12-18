@@ -82,6 +82,43 @@ export class OfferService {
     };
   }
 
+  async getOffersCount(query: OfferQueryDto) {
+    const { search, status, profileId, productUploadId } = query;
+
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
+    const searchFilter: any = {
+      $or: [],
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
+    };
+
+    const user = await this.userRepository.findOne(profileId);
+
+    if (status) searchFilter.$and.push({ status: { $regex: status, $options: 'i' } });
+    if (productUploadId) searchFilter.$and.push({ productUploadId: { $regex: productUploadId, $options: 'i' } });
+    if (profileId) searchFilter.$or.push(
+      { senderId: user?._id },
+      { receiverId: user?._id }
+    );
+
+    if (search) {
+      searchFilter.$or.push(
+        { 'senderDetails.firstName': search },
+        { 'senderDetails.lastName': search },
+        { 'receiverDetails.firstName': search },
+        { 'receiverDetails.lastName': search }
+      )
+    }
+
+    if (!searchFilter.$or.length) delete searchFilter.$or;
+    if (!searchFilter.$and.length) delete searchFilter.$and;
+
+    return await this.offerRepository.getTotal(searchFilter);
+  }
+
   async getOfferDetail(offerId: string) {
     const offer = await this.offerRepository.findOne(offerId)
 

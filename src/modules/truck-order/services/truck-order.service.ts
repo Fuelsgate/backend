@@ -77,6 +77,46 @@ export class TruckOrderService {
     };
   }
 
+  async getTruckOrdersCount(query: TruckOrderQueryDto) {
+    const { status, trackingId, buyerId, truckId, profileId, profileType, orderId } = query;
+
+    if (profileId && !profileType) {
+      throw new BadRequestException("Please provide a profile type")
+    }
+
+    const todayStart = startOfDay(new Date());
+    const todayEnd = endOfDay(new Date());
+
+    let profile: any, buyer: any, order: any;
+
+    if (buyerId) buyer = await this.buyerRepository.findOne(buyerId)
+    if (profileId && profileType === 'seller') profile = await this.sellerRepository.findOne(profileId)
+    if (profileId && profileType === 'transporter') profile = await this.transporterRepository.findOne(profileId)
+    if (orderId) order = await this.orderRepository.findOne(orderId)
+
+    if (buyerId && !buyer) throw new BadRequestException("Buyer ID is invalid")
+    if (profileId && !profile) throw new BadRequestException("Profile ID is invalid")
+    if (orderId && !order) throw new BadRequestException("order ID is invalid")
+
+    const searchFilter: any = {
+      $and: [
+        { createdAt: { $gte: todayStart, $lte: todayEnd } }
+      ],
+      $or: []
+    };
+
+    if (buyerId) searchFilter.$or.push({ buyerId: buyer?._id });
+    if (orderId) searchFilter.$or.push({ orderId: order?._id });
+    if (profileId) searchFilter.$or.push({ profileId: profile?._id });
+    if (trackingId) searchFilter.$or.push({ trackingId: { $regex: trackingId, $options: 'i' } });
+    if (status) searchFilter.$or.push({ status: { $regex: status, $options: 'i' } });
+    if (truckId) searchFilter.$or.push({ truckId: { $regex: truckId, $options: 'i' } });
+
+    if (!searchFilter.$or.length) delete searchFilter.$or;
+
+    return await this.truckOrderRepository.getTotal(searchFilter)
+  }
+
   async getOneOrder(truckOrderId: string) {
     const truckOrder = await this.truckOrderRepository.findOne(truckOrderId)
     if (!truckOrder) {

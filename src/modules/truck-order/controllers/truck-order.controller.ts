@@ -21,6 +21,19 @@ export class OrderController {
     });
   }
 
+  @Get('get-truck-orders-count')
+  async getTruckOrdersCount(
+    @Query() query: TruckOrderQueryDto,
+    @Response() res,
+  ): Promise<[]> {
+    const data = await this.truckOrderService.getTruckOrdersCount(query)
+    return res.status(200).json({
+      message: 'Truck Orders count fetched successfully',
+      data,
+      statusCode: 200,
+    });
+  }
+
   @Get(':truckOrderId')
   async getOne(
     @Param() param,
