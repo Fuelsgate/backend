@@ -21,6 +21,9 @@ export class Seller {
   @Prop({ required: true })
   phoneNumber: string;
 
+  @Prop({ required: false, default: null })
+  profilePicture: string;
+
   @Prop({ required: false })
   officeAddress: string;
 

@@ -60,7 +60,7 @@ export class TransporterService {
   }
 
   async updateTransporterAccount(
-    transporterData: TransporterDto,
+    transporterData: Partial<TransporterDto>,
     user: IJwtPayload,
   ) {
     const _user = await this.userRepository.findOne(user.id);

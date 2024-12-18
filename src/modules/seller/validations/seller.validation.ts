@@ -1,5 +1,9 @@
 import * as yup from 'yup';
 
+export const profilePictureSchema = yup.object({
+  profilePicture: yup.string().required('Profile picture is required'),
+});
+
 export const sellerSchema = yup.object({
   category: yup
     .string()

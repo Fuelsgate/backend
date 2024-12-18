@@ -24,16 +24,16 @@ export class ProductUploadRepository {
     const record = await this.productUploadModel.find(searchFilter).sort({ timestamp: 'asc' }).skip(offset).limit(limit).lean().populate('productId').populate('depotHubId').populate('sellerId')
 
     const ongoingNegotiations = await this.offerModel.find().select('productUploadId senderId _id').lean();
-    const ongoingOrders = await this.orderModel.find().select('productUploadId buyerId volume _id').lean();
+    const ongoingOrders = await this.orderModel.find().select('productUploadId buyerId volume _id status').lean();
 
     const offers = ongoingNegotiations.map(offer => ({ productUploadId: offer.productUploadId.toString(), senderId: offer.senderId.toString(), offerId: offer._id.toString() }));
-    const orders = ongoingOrders.map(order => ({ productUploadId: order.productUploadId.toString(), orderId: order._id.toString(), buyerId: order.buyerId?.toString(), volume: order.volume }));
+    const orders = ongoingOrders.map(order => ({ productUploadId: order.productUploadId.toString(), orderId: order._id.toString(), buyerId: order.buyerId?.toString(), volume: order.volume, status: order.status }));
 
     const productUploads = record.map(product => {
       return {
         ...product,
         offers: offers.filter(item => item.productUploadId === product._id.toString()).map(item => ({ senderId: item.senderId, _id: item.offerId })),
-        orders: orders.filter(item => item.productUploadId === product._id.toString()).map(item => ({ buyerId: item.buyerId, _id: item.orderId, volume: item.volume }))
+        orders: orders.filter(item => item.productUploadId === product._id.toString()).map(item => ({ buyerId: item.buyerId, _id: item.orderId, volume: item.volume, status: item.status }))
       };
     });
 

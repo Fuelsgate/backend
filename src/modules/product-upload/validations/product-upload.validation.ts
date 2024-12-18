@@ -15,7 +15,8 @@ export const productUploadSchema = yup.object({
     .required('Volume is required'),
   productQuality: yup
     .string()
-    .required('Product quality is required'),
+    .nullable()
+    .optional(),
   expiresIn: yup
     .date()
     .typeError('Expires In must be a valid date')

@@ -23,10 +23,13 @@ export class ProductUpload {
   @Prop({ required: true })
   price: number;
 
+  @Prop({ required: false, default: null })
+  depot: string;
+
   @Prop({ required: true })
   expiresIn: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: null })
   productQuality: string;
 
   @Prop({ required: true, enum: ['active', 'expired'], default: 'active' })

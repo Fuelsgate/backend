@@ -57,7 +57,7 @@ export class SellerService {
     }
   }
 
-  async updateSellerAccount(sellerData: SellerDto, user: IJwtPayload) {
+  async updateSellerAccount(sellerData: Partial<SellerDto>, user: IJwtPayload) {
     const _user = await this.userRepository.findOne(user.id)
     if (!_user) throw new BadRequestException("User ID is invalid");
     const seller = await this.sellerRepository.updateQuery({ userId: _user._id }, sellerData)

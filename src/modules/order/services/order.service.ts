@@ -7,8 +7,7 @@ import { IJwtPayload } from "src/shared/strategies/jwt.strategy";
 import { BuyerRepository } from "src/modules/buyer/repositories/buyer.repository";
 import { generateOrderId } from "src/utils/helpers";
 import { OrderGateway } from "../gateway/order.gateway";
-import { endOfDay } from "date-fns";
-import { startOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 
 @Injectable()
 export class OrderService {
@@ -76,6 +75,18 @@ export class OrderService {
   }
 
   async updateStatusOrder(orderId: string, body: OrderDto) {
+    console.log('pizza', orderId, body)
+    const _order = await this.orderRepository.findOne(orderId)
+    if (body.status === 'completed') {
+      const productUpload = await this.productUploadRepository.findOne(_order.productUploadId)
+      if (!productUpload) throw new NotFoundException('Product Upload Not found')
+      productUpload.volume -= Number(_order.volume)
+      await productUpload.save()
+      if (!_order) throw new NotFoundException('Order Not found')
+      const order = await this.orderRepository.update(orderId, body);
+      this.orderGateway.broadcastOrderStatus(order);
+      return order
+    }
     const order = await this.orderRepository.update(orderId, body);
     this.orderGateway.broadcastOrderStatus(order);
     return order

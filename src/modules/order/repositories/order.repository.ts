@@ -33,7 +33,10 @@ export class OrderRepository {
     if (!isValidObjectId(orderId)) return null;
     return await this.orderModel
       .findById(orderId)
-      .populate('buyerId')
+      .populate({
+        path: 'buyerId',
+        populate: { path: 'userId' }
+      })
       .populate('sellerId')
       .populate({
         path: 'productUploadId',

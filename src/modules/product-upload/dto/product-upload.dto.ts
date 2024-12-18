@@ -8,10 +8,11 @@ export interface ProductUploadDto {
   sellerId?: string | Types.ObjectId;
   productId?: string | Types.ObjectId;
   depotHubId?: string | Types.ObjectId;
+  depot: string
   volume: number
   price: number
   expiresIn: Date
-  productQuality: string
+  productQuality?: string | null
   status: ProductUploadStatus
 }
 

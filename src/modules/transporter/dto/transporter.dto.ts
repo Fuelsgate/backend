@@ -6,5 +6,6 @@ export interface TransporterDto {
   companyEmail: string;
   phoneNumber: string;
   state: string;
+  profilePicture: string;
   userId: Types.ObjectId | string | undefined;
 }

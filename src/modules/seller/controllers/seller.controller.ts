@@ -10,7 +10,7 @@ import {
 import { YupValidationPipe } from 'src/shared/pipes/yup-validation.pipe';
 import { SellerService } from '../services/seller.service';
 import { SellerDto } from '../dto/seller.dto';
-import { sellerSchema } from '../validations/seller.validation';
+import { profilePictureSchema, sellerSchema } from '../validations/seller.validation';
 
 @Controller('seller')
 export class SellerController {
@@ -57,6 +57,21 @@ export class SellerController {
     const data = await this.sellerService.updateSellerAccount(body, user)
     return res.status(200).json({
       message: 'Seller profile updated successfully',
+      data,
+      statusCode: 200,
+    })
+  }
+
+  @Post('upload-profile-picture')
+  async uploadProfilePicture(
+    @Request() req,
+    @Body(new YupValidationPipe(profilePictureSchema)) body: Partial<SellerDto>,
+    @Response() res
+  ): Promise<any> {
+    const { user } = req
+    const data = await this.sellerService.updateSellerAccount(body, user)
+    return res.status(200).json({
+      message: 'Seller profile picture uploaded successfully',
       data,
       statusCode: 200,
     })

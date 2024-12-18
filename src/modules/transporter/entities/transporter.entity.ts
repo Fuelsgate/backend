@@ -16,6 +16,9 @@ export class Transporter {
   @Prop({ required: false, default: null })
   companyEmail: string;
 
+  @Prop({ required: false, default: null })
+  profilePicture: string;
+
   @Prop({ required: true })
   phoneNumber: string;
 
