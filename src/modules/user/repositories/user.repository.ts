@@ -48,7 +48,7 @@ export class UserRepository {
       return undefined;
     }
 
-    return user as IUserModel;
+    return user as unknown as IUserModel;
   }
 
   async update(

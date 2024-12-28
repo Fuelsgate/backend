@@ -18,11 +18,17 @@ export class User implements IUser {
   @Prop({ required: true, lowercase: true, unique: true })
   email: string;
 
-  @Prop({ required: true, select: false })
+  @Prop({ default: null, select: false })
   password: string;
 
   @Prop({ default: new Date().getTime() })
   lastSeen: Date;
+
+  @Prop({ default: null })
+  provider: string;
+
+  @Prop({ default: null })
+  providerId: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

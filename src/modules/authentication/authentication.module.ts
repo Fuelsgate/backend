@@ -32,12 +32,20 @@ import { Seller, SellerSchema } from '../seller/entities/seller.entity';
 import { Transporter, TransporterSchema } from '../transporter/entities/transporter.entity';
 import { ProductRepository } from '../product/repositories/product.repository';
 import { Product, ProductSchema } from '../product/entities/product.entity';
+// import { GoogleStrategy } from 'src/shared/strategies/google-oauth.strategy';
+// import { GoogleOauthGuard } from 'src/shared/guards/google-oauth.guard';
+import { GoogleAuthService } from './services/google-auth.service';
+import { GoogleAuthController } from './controllers/google-auth.controller';
+// import { GoogleOauthGuard } from './guards/google-oauth.guard';
+// import { GoogleStrategy } from './guards/google-oauth.strategy';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     JwtModule.register({
       secret: TOKEN_SECRET,
       signOptions: { expiresIn: '7890048s' },
+      global: true,
     }),
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
@@ -51,8 +59,13 @@ import { Product, ProductSchema } from '../product/entities/product.entity';
       { name: Product.name, schema: ProductSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    UserModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
+    }),
   ],
-  controllers: [AuthenticationController],
+  controllers: [AuthenticationController, GoogleAuthController],
   providers: [
     AuthenticationService,
     AuthenticationRepository,
@@ -60,6 +73,9 @@ import { Product, ProductSchema } from '../product/entities/product.entity';
     RoleService,
     JwtStrategy,
     JwtAuthGuard,
+    // GoogleStrategy,
+    // GoogleOauthGuard,
+    GoogleAuthService,
     UserRepository,
     UserRoleRepository,
     RoleRepository,

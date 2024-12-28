@@ -10,6 +10,9 @@ export const productSchema = yup.object({
   color: yup
     .string()
     .required('Product bg-color class is required'),
+  unit: yup
+    .string()
+    .required('Product unit is required'),
   status: yup
     .string()
     .oneOf(

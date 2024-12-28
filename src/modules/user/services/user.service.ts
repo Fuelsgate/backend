@@ -92,6 +92,10 @@ export class UserService {
     };
   }
 
+  async findOneQueryNew(query: unknown): Promise<IUser> {
+    return await this.userRepository.findOneQuery(query);
+  }
+
   async update(id: string, updateUserDto: IUser): Promise<IUserModel | undefined> {
     return await this.userRepository.update(id, updateUserDto);
   }

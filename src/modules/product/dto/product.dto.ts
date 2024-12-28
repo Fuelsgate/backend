@@ -7,6 +7,7 @@ export interface ProductDto {
   value: string
   color: string
   status: ProductStatus
+  unit: string
 }
 
 export interface ProductQueryDto extends QueryDto { }

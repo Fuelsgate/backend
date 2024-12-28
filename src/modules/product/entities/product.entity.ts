@@ -14,6 +14,9 @@ export class Product {
   @Prop({ required: true })
   color: string;
 
+  @Prop({ required: true })
+  unit: string;
+
   @Prop({ required: true, enum: ['active', 'inactive'] })
   status: string;
 }

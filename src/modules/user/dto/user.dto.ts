@@ -6,9 +6,11 @@ export interface IUser {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   status: string;
   lastSeen: Date;
+  providerId?: string;
+  provider?: string;
 }
 
 export interface IUserWithRole extends IUser {

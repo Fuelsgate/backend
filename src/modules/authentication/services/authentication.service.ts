@@ -111,8 +111,10 @@ export class AuthenticationService {
         password: 'Password is incorrect',
       });
     }
+
     const user = await this.userService.findUserWithRole(_user._id);
     let profile: unknown;
+
     switch (user.role) {
       case "buyer":
         profile = await this.buyerRepository.findOneQuery({ userId: user._id })
@@ -133,7 +135,14 @@ export class AuthenticationService {
         break;
     }
 
-    const token = this.generateJwtToken(user);
+    const payload = {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = this.jwtService.sign(payload)
+
     const finalResult = {
       user: {
         ...user,
@@ -155,16 +164,6 @@ export class AuthenticationService {
     const role = await this.roleService.findOne(userRole.roleId);
 
     return role.name;
-  }
-
-  private generateJwtToken(user: any): string {
-    const payload = {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    };
-
-    return this.jwtService.sign(payload);
   }
 
   async comparePasswords(
