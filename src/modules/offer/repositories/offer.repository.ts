@@ -89,15 +89,46 @@ export class OfferRepository {
           },
         },
       ])
-
       .skip(offset)
       .limit(_limit)
       .exec();
   }
 
-  async getTotal(searchFilter: unknown) {
-    return await this.offerModel.countDocuments(searchFilter);
+  async getTotal(searchFilter: any) {
+    const result = await this.offerModel.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'senderId',
+          foreignField: '_id',
+          as: 'senderDetails',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'receiverId',
+          foreignField: '_id',
+          as: 'receiverDetails',
+        },
+      },
+      {
+        $unwind: '$senderDetails',
+      },
+      {
+        $unwind: '$receiverDetails',
+      },
+      {
+        $match: searchFilter,
+      },
+      {
+        $count: 'total',
+      },
+    ]).exec();
+
+    return result[0]?.total || 0;
   }
+
 
   async create(payload: OfferDto) {
     return await new this.offerModel(payload).save();

@@ -44,36 +44,50 @@ export class OfferService {
     const todayStart = startOfDay(new Date());
     const todayEnd = endOfDay(new Date());
 
+    // Base filter for offers created today
     const searchFilter: any = {
-      $or: [],
-      $and: [
-        { createdAt: { $gte: todayStart, $lte: todayEnd } }
-      ],
+      createdAt: { $gte: todayStart, $lte: todayEnd },
     };
 
-    const user = await this.userRepository.findOne(profileId);
-
-    if (status) searchFilter.$and.push({ status: { $regex: status, $options: 'i' } });
-    if (productUploadId) searchFilter.$and.push({ productUploadId: { $regex: productUploadId, $options: 'i' } });
-    if (profileId) searchFilter.$or.push(
-      { senderId: user?._id },
-      { receiverId: user?._id }
-    );
-
-    if (search) {
-      searchFilter.$or.push(
-        { 'senderDetails.firstName': search },
-        { 'senderDetails.lastName': search },
-        { 'receiverDetails.firstName': search },
-        { 'receiverDetails.lastName': search }
-      )
+    // Add profileId-specific filtering
+    if (profileId) {
+      const user = await this.userRepository.findOne(profileId);
+      if (user) {
+        searchFilter.$or = [
+          { senderId: user._id },
+          { receiverId: user._id },
+        ];
+      }
     }
 
-    if (!searchFilter.$or.length) delete searchFilter.$or;
-    if (!searchFilter.$and.length) delete searchFilter.$and;
+    // Add other filters conditionally
+    if (status) {
+      searchFilter.status = { $regex: status, $options: 'i' };
+    }
 
+    if (productUploadId) {
+      searchFilter.productUploadId = { $regex: productUploadId, $options: 'i' };
+    }
+
+    if (search) {
+      const nameFilter = {
+        $or: [
+          { 'senderDetails.firstName': { $regex: search, $options: 'i' } },
+          { 'senderDetails.lastName': { $regex: search, $options: 'i' } },
+          { 'receiverDetails.firstName': { $regex: search, $options: 'i' } },
+          { 'receiverDetails.lastName': { $regex: search, $options: 'i' } },
+        ],
+      };
+
+      // Merge search filter with existing conditions
+      searchFilter.$and = searchFilter.$and || [];
+      searchFilter.$and.push(nameFilter);
+    }
+
+    // Fetch offers and calculate pagination
     const offers = await this.offerRepository.findAll(searchFilter, offset, limit);
     const total = await this.offerRepository.getTotal(searchFilter);
+
     return {
       offers,
       total,
@@ -81,6 +95,7 @@ export class OfferService {
       totalPages: Math.ceil(total / limit),
     };
   }
+
 
   async getOffersCount(query: OfferQueryDto) {
     const { search, status, profileId, productUploadId } = query;
