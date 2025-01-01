@@ -14,7 +14,7 @@ async function bootstrap() {
   const depotHubSeedService = app.get(DepotHubSeedService);
   app.setGlobalPrefix('api/v1');
 
-  const allowedOrigins = ['*', FRONTEND_URL, 'http://192.168.0.39:3200', 'http://192.168.0.39:3000', 'http://localhost:3000'];
+  const allowedOrigins = ['*', FRONTEND_URL, 'http://192.168.0.39:3200', 'http://192.168.0.39:3000', 'http://localhost:3000', 'https://www.fuelsgate.com', 'https://fuelsgate.com'];
   app.enableCors({
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
